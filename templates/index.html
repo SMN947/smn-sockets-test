@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Chat App</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  <script type="text/javascript">
+    var socket = io.connect('https://' + document.domain + ':' + location.port, {
+      transport: 'websocket'
+    });
+    console.log("Socket at: " + 'https//' + document.domain + ':' + location.port);
+
+
+    var totalMessagesReceived = 0;
+    var messagesPerSecond = 0;
+
+    socket.on('message', function (data) {
+      totalMessagesReceived++;
+      var p = document.createElement('p');
+      p.innerHTML = JSON.stringify(data);
+      document.getElementById('chat').appendChild(p);
+      updateMessageStats();
+    });
+
+    socket.on('update_clients_count', function (count) {
+      document.getElementById('clientsCount').innerHTML = count;
+    });
+
+    function sendMessage() {
+      var message = document.getElementById('message').value;
+      socket.emit('message', message);
+      document.getElementById('message').value = '';
+    }
+
+    function updateMessageStats() {
+      messagesPerSecond = totalMessagesReceived / ((Date.now() - startTime) / 1000);
+      document.getElementById('messagesReceived').innerHTML = totalMessagesReceived;
+      document.getElementById('messagesPerSecond').innerHTML = messagesPerSecond.toFixed(2);
+    }
+
+    var startTime = Date.now();
+
+    // Update message statistics every second
+    setInterval(updateMessageStats, 1000);
+  </script>
+</head>
+
+<body>
+  <h1>Chat App</h1>
+  <table>
+    <tr>
+      <th>Connected Clients Count:</th>
+      <td id="clientsCount">{{ connected_clients }}</td>
+    </tr>
+    <tr>
+      <th>Total Messages Received:</th>
+      <td id="messagesReceived">0</td>
+    </tr>
+    <tr>
+      <th>Messages Per Second:</th>
+      <td id="messagesPerSecond">0.00</td>
+    </tr>
+  </table>
+  <input type="text" id="message" placeholder="Type a message..." />
+  <button onclick="sendMessage()">Send</button>
+  <div id="chat"></div>
+</body>
+
+</html>

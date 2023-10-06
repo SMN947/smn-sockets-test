@@ -1,0 +1,30 @@
+config:
+  target: https://sea-turtle-app-tzcb9.ondigitalocean.app/
+  phases:
+    - duration: 60
+      arrivalRate: 1
+      rampTo: 5
+      name: Warm up phase
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 10
+      name: Ramp up load
+    - duration: 30
+      arrivalRate: 10
+      rampTo: 30
+      name: Spike phase
+      
+  plugins:
+    ensure: {}
+    apdex: {}
+    metrics-by-endpoint: {}
+
+scenarios:
+  - name: "Socket Test"
+    engine: 'socketio'
+    flow:
+      - loop:
+          - emit:
+              channel: 'message'
+              data: 'Hello, WebSocket Server!'
+          - think: 1
